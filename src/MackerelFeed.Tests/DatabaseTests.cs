@@ -2,6 +2,7 @@
 // Copyright (c) Drastic Actions. All rights reserved.
 // </copyright>
 
+using MackerelFeed.Models;
 using MackerelFeed.Services;
 
 namespace MackerelFeed.Tests;
@@ -35,5 +36,15 @@ public sealed class DatabaseTests
         var appSettings = await database.GetAppSettingsAsync();
         Assert.IsNotNull(appSettings);
         Assert.IsTrue(appSettings.Id > 0);
+
+        appSettings.AppTheme = AppTheme.Dark;
+        appSettings.LanguageSetting = LanguageSetting.English;
+        var updateResult = await database.UpdateAppSettingsAsync(appSettings);
+        Assert.IsTrue(updateResult);
+        var updatedAppSettings = await database.GetAppSettingsAsync();
+        Assert.IsNotNull(updatedAppSettings);
+        Assert.IsTrue(updatedAppSettings.Id > 0);
+        Assert.AreEqual(appSettings.AppTheme, updatedAppSettings.AppTheme);
+        Assert.AreEqual(appSettings.LanguageSetting, updatedAppSettings.LanguageSetting);
     }
 }

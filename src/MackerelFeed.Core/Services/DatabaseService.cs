@@ -95,6 +95,32 @@ public class DatabaseService : IDisposable
     }
 
     /// <summary>
+    /// Update AppSettings.
+    /// </summary>
+    /// <param name="settings"><see cref="AppSettings"/>.</param>
+    /// <returns>If the app settings were updated.</returns>
+    public async Task<bool> UpdateAppSettingsAsync(AppSettings settings)
+    {
+        if (!this.isInitialized)
+        {
+            return false;
+        }
+
+        int rows = 0;
+
+        try
+        {
+           rows = await this.database.UpdateAsync(settings, typeof(AppSettings));
+        }
+        catch (Exception ex)
+        {
+            this.errorHandler.HandleError(new DatabaseException("Error updating AppSettings.", ex));
+        }
+
+        return rows > 0;
+    }
+
+    /// <summary>
     /// Dispose elements.
     /// </summary>
     public void Dispose()
