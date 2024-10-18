@@ -3,6 +3,7 @@
 // </copyright>
 
 using DA.UI.Services;
+using MackerelFeed.Events;
 using MackerelFeed.Exceptions;
 using MackerelFeed.Models;
 using SQLite;
@@ -45,6 +46,31 @@ public class DatabaseService : IDisposable
     }
 
     /// <summary>
+    /// Event for when a FeedListItem is updated.
+    /// </summary>
+    public event EventHandler<FeedListItemContentEventArgs>? OnFeedListItemUpdate;
+
+    /// <summary>
+    /// Event for when a FeedListItem is removed.
+    /// </summary>
+    public event EventHandler<FeedListItemContentEventArgs>? OnFeedListItemRemove;
+
+    /// <summary>
+    /// Event for when a FeedFolder is updated.
+    /// </summary>
+    public event EventHandler<FeedFolderContentEventArgs>? OnFeedFolderUpdate;
+
+    /// <summary>
+    /// Event for when a FeedFolder is removed.
+    /// </summary>
+    public event EventHandler<FeedFolderContentEventArgs>? OnFeedFolderRemove;
+
+    /// <summary>
+    /// Event for feed refresh.
+    /// </summary>
+    public event EventHandler? OnRefreshFeeds;
+
+    /// <summary>
     /// Gets a value indicating whether the database is initialized.
     /// </summary>
     public bool IsInitialized => this.isInitialized;
@@ -58,6 +84,192 @@ public class DatabaseService : IDisposable
         var createTablesResult = await this.database.CreateTablesAsync<AppSettings, FeedItem, FeedListItem, FeedFolder>(CreateFlags.None);
         this.isInitialized = createTablesResult.Results.Any(x => x.Value != CreateTableResult.Created && x.Value != CreateTableResult.Migrated) == false;
         return this.isInitialized;
+    }
+
+    /// <summary>
+    /// Drop all tables.
+    /// </summary>
+    /// <returns>Task.</returns>
+    public async Task DropTablesAsync()
+    {
+        await this.database.DropTableAsync<AppSettings>();
+        await this.database.DropTableAsync<FeedItem>();
+        await this.database.DropTableAsync<FeedListItem>();
+        await this.database.DropTableAsync<FeedFolder>();
+        this.isInitialized = false;
+    }
+
+    public async Task<IEnumerable<FeedListItem>> GetFeedListItemsAsync()
+    {
+        if (!this.isInitialized)
+        {
+            return Array.Empty<FeedListItem>();
+        }
+
+        try
+        {
+            return await this.database.Table<FeedListItem>().ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            this.errorHandler.HandleError(new DatabaseException("Error getting FeedListItems.", ex));
+            return Array.Empty<FeedListItem>();
+        }
+    }
+
+    public async Task<IEnumerable<FeedListItem>> GetUnsortedFeedListItemsAsync()
+    {
+        if (!this.isInitialized)
+        {
+            return Array.Empty<FeedListItem>();
+        }
+
+        try
+        {
+            return await this.database.Table<FeedListItem>().Where(n => n.FolderId == null).ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            this.errorHandler.HandleError(new DatabaseException("Error getting FeedListItems.", ex));
+            return Array.Empty<FeedListItem>();
+        }
+    }
+
+    public async Task<FeedListItem?> GetFeedListItemAsync(string uriString)
+    {
+        if (!this.isInitialized)
+        {
+            return null;
+        }
+
+        if (!Uri.TryCreate(uriString, UriKind.Absolute, out Uri? uri))
+        {
+            return null;
+        }
+
+        try
+        {
+            return await this.database.Table<FeedListItem>().FirstOrDefaultAsync(n => n.Uri == uri);
+        }
+        catch (Exception ex)
+        {
+            this.errorHandler.HandleError(new DatabaseException("Error getting FeedListItem.", ex));
+            return null;
+        }
+    }
+
+    public async Task<FeedListItem?> GetFeedListItemAsync(int id)
+    {
+        if (!this.isInitialized)
+        {
+            return null;
+        }
+
+        try
+        {
+            return await this.database.Table<FeedListItem>().FirstOrDefaultAsync(n => n.Id == id);
+        }
+        catch (Exception ex)
+        {
+            this.errorHandler.HandleError(new DatabaseException("Error getting FeedListItem.", ex));
+            return null;
+        }
+    }
+
+    public async Task<IEnumerable<FeedItem>> GetFeedItemsAsync(int feedListItemId)
+    {
+        if (!this.isInitialized)
+        {
+            return Array.Empty<FeedItem>();
+        }
+
+        try
+        {
+            return await this.database.Table<FeedItem>().Where(n => n.FeedListItemId == feedListItemId).ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            this.errorHandler.HandleError(new DatabaseException("Error getting FeedItems.", ex));
+            return Array.Empty<FeedItem>();
+        }
+    }
+
+    public async Task<int> UpsertFeedListItemAsync(FeedListItem item, IEnumerable<FeedItem>? feedItems = default)
+    {
+        if (!this.isInitialized)
+        {
+            return 0;
+        }
+
+        int rows = 0;
+
+        try
+        {
+            var result = 0;
+            if (item.Id <= 0)
+            {
+                result = await this.database.InsertAsync(item, typeof(FeedListItem));
+            }
+            else
+            {
+                result = await this.database.UpdateAsync(item, typeof(FeedListItem));
+            }
+
+            rows = result > 0 ? 1 : 0;
+            if (feedItems is not null)
+            {
+                // Set the id of the FeedListItem on the FeedItems.
+                foreach (var feedItem in feedItems)
+                {
+                    feedItem.FeedListItemId = item.Id;
+                }
+
+                var count = await this.UpsertFeedItemsAsync(feedItems);
+                rows += count;
+            }
+
+            this.OnFeedListItemUpdate?.Invoke(this, new FeedListItemContentEventArgs(item));
+        }
+        catch (Exception ex)
+        {
+            this.errorHandler.HandleError(new DatabaseException("Error upserting FeedListItem.", ex));
+        }
+
+        return rows;
+    }
+
+    public async Task<int> UpsertFeedItemsAsync(IEnumerable<FeedItem> items)
+    {
+        if (!this.isInitialized)
+        {
+            return 0;
+        }
+
+        int rows = 0;
+
+        try
+        {
+            var missingFeedListItemIds = items.Any(x => x.FeedListItemId <= 0);
+            if (missingFeedListItemIds)
+            {
+                throw new DatabaseException("FeedItem is missing a FeedListItemId.");
+            }
+
+            var itemsWithoutId = items.Where(x => x.Id <= 0);
+            var itemsWithId = items.Where(x => x.Id > 0);
+
+            var tasks = itemsWithoutId.Select(x => this.database.InsertAsync(x, typeof(FeedItem)));
+            var tasks2 = itemsWithId.Select(x => this.database.UpdateAsync(x, typeof(FeedItem)));
+            var totalTasks = tasks.Concat(tasks2);
+            var results = await Task.WhenAll(totalTasks);
+            rows = results.Count(x => x > 0);
+        }
+        catch (Exception ex)
+        {
+            this.errorHandler.HandleError(new DatabaseException("Error upserting FeedItems.", ex));
+        }
+
+        return rows;
     }
 
     /// <summary>

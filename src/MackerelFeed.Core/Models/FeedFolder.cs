@@ -26,10 +26,4 @@ public class FeedFolder
     /// Gets or sets the name of the folder.
     /// </summary>
     public string? Name { get; set; }
-
-    /// <summary>
-    /// Gets or sets the list of Feed List Items.
-    /// </summary>
-    [SQLite.Ignore]
-    public virtual IEnumerable<FeedListItem>? Items { get; set; }
 }

@@ -17,7 +17,7 @@ public class DatabaseException : Exception
         : base(message)
     {
     }
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="DatabaseException"/> class.
     /// </summary>

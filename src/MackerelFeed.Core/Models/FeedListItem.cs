@@ -96,12 +96,6 @@ public class FeedListItem : INotifyPropertyChanged
     public FeedType FeedType { get; set; }
 
     /// <summary>
-    /// Gets or sets the list of feed items.
-    /// </summary>
-    [SQLite.Ignore]
-    public virtual IEnumerable<FeedItem>? Items { get; set; }
-
-    /// <summary>
     /// Gets or sets a value indicating whether the feed is favorited.
     /// </summary>
     public bool IsFavorite

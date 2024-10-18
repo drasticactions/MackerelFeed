@@ -27,7 +27,7 @@ public class RssFeedService : IFeedService
         this.client = client ?? new HttpClient();
         if (string.IsNullOrEmpty(this.client.DefaultRequestHeaders.UserAgent.ToString()))
         {
-            this.client.DefaultRequestHeaders.UserAgent.ParseAdd("MauiFeed/1.0");
+            this.client.DefaultRequestHeaders.UserAgent.ParseAdd("MackerelFeed/1.0");
         }
         this.errorHandler = errorHandler;
     }
@@ -51,7 +51,7 @@ public class RssFeedService : IFeedService
     }
 
     /// <inheritdoc/>
-    public async Task<(FeedListItem? FeedList, IList<Models.FeedItem>? FeedItemList)> ReadFeedAsync(Uri feedUri,FeedListItem? feedItem = null, CancellationToken? token = null)
+    public async Task<(FeedListItem? FeedList, IList<Models.FeedItem>? FeedItemList)> ReadFeedAsync(Uri feedUri, FeedListItem? feedItem = null, CancellationToken? token = null)
     {
         var stringResponse = await this.client.GetStringAsync(feedUri);
         return await this.ReadFeedAsync(stringResponse, feedItem ?? new FeedListItem() { Uri = feedUri }, token);

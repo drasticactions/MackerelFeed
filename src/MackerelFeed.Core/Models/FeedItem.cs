@@ -46,12 +46,6 @@ public class FeedItem : INotifyPropertyChanged
     public int FeedListItemId { get; set; }
 
     /// <summary>
-    /// Gets or sets the Feed List Item.
-    /// </summary>
-    [SQLite.Ignore]
-    public virtual FeedListItem? Feed { get; set; }
-
-    /// <summary>
     /// Gets or sets the title of the feed item.
     /// </summary>
     public string? Title

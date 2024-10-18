@@ -27,7 +27,7 @@ public class JsonFeedService : IFeedService
         this.client = client ?? new HttpClient();
         if (string.IsNullOrEmpty(this.client.DefaultRequestHeaders.UserAgent.ToString()))
         {
-            this.client.DefaultRequestHeaders.UserAgent.ParseAdd("MauiFeed/1.0");
+            this.client.DefaultRequestHeaders.UserAgent.ParseAdd("MackerelFeed/1.0");
         }
         this.errorHandler = errorHandler;
     }
