@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>MackerelFeed</RootNamespace>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JsonFeed.NET" />
+    <PackageReference Include="Sagara.FeedReader" />
+    <PackageReference Include="Drastic.sqlite-net-base" />
+    <PackageReference Include="SQLitePCLRaw.bundle_green" />
+    <PackageReference Include="System.Text.Json" />
+  </ItemGroup>
+
+</Project>

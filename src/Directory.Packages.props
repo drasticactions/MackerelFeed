@@ -1,0 +1,17 @@
+<Project>
+    <PropertyGroup>
+      <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+      <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+    </PropertyGroup>
+    <ItemGroup>
+      <PackageVersion Include="JsonFeed.NET" Version="2.0.0" />
+      <PackageVersion Include="AngleSharp" Version="1.2.0-beta.431" />
+      <PackageVersion Include="DrasticActions.UI" Version="0.0.1-preview" />
+      <PackageVersion Include="Sagara.FeedReader" Version="2.0.0" />
+      <PackageVersion Include="SQLitePCLRaw.provider.sqlite3" Version="2.1.10" />
+      <PackageVersion Include="SQLitePCLRaw.bundle_green" Version="2.1.10" />
+      <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
+      <PackageVersion Include="Drastic.sqlite-net-base" Version="2.0.0-alpha" />
+      <PackageVersion Include="System.Text.Json" Version="9.0.0-rc.2.24473.5" />
+    </ItemGroup>
+  </Project>
