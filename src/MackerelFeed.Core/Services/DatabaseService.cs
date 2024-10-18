@@ -55,14 +55,9 @@ public class DatabaseService : IDisposable
     /// <returns>Bool.</returns>
     public async Task<bool> InitializeAsync()
     {
-        var createAppSettingsTable = this.database.CreateTableAsync<AppSettings>();
-        var results = await Task.WhenAll(createAppSettingsTable);
-        if (results.Any(n => n != CreateTableResult.Created && n != CreateTableResult.Migrated))
-        {
-            return this.isInitialized = false;
-        }
-
-        return this.isInitialized = true;
+        var createTablesResult = await this.database.CreateTablesAsync<AppSettings, FeedItem, FeedListItem, FeedFolder>(CreateFlags.None);
+        this.isInitialized = createTablesResult.Results.Any(x => x.Value != CreateTableResult.Created && x.Value != CreateTableResult.Migrated) == false;
+        return this.isInitialized;
     }
 
     /// <summary>

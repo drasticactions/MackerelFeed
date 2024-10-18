@@ -42,6 +42,7 @@ public class FeedListItem : INotifyPropertyChanged
     /// <summary>
     /// Gets or sets the folder.
     /// </summary>
+    [SQLite.Ignore]
     public virtual FeedFolder? Folder { get; set; }
 
     /// <summary>
@@ -97,6 +98,7 @@ public class FeedListItem : INotifyPropertyChanged
     /// <summary>
     /// Gets or sets the list of feed items.
     /// </summary>
+    [SQLite.Ignore]
     public virtual IEnumerable<FeedItem>? Items { get; set; }
 
     /// <summary>

@@ -30,5 +30,6 @@ public class FeedFolder
     /// <summary>
     /// Gets or sets the list of Feed List Items.
     /// </summary>
+    [SQLite.Ignore]
     public virtual IEnumerable<FeedListItem>? Items { get; set; }
 }
