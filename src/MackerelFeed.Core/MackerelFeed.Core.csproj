@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DrasticActions.UI" />
     <PackageReference Include="JsonFeed.NET" />
     <PackageReference Include="Sagara.FeedReader" />
     <PackageReference Include="Drastic.sqlite-net-base" />

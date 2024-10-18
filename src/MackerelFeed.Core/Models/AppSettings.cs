@@ -2,6 +2,11 @@
 // Copyright (c) Drastic Actions. All rights reserved.
 // </copyright>
 
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
+using SQLite;
+
 namespace MackerelFeed.Models;
 
 /// <summary>
@@ -12,6 +17,9 @@ public class AppSettings
     /// <summary>
     /// Gets or sets the id.
     /// </summary>
+    [PrimaryKey]
+    [AutoIncrement]
+    [JsonIgnore]
     public int Id { get; set; }
 
     /// <summary>
